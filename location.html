@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TimeTag - MNK Coders 2019&copy;</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+    </head>
+    <body>
+        <script type="text/javascript" src="js/location.js"></script>
+
+        <script type="text/javascript">
+            
+            var loc = new LocationProvider();
+            
+            
+            window.setTimeout( function(){
+                
+                console.log( loc.export() );                
+                
+            }, 5000) ;
+            
+            
+        </script>
+    </body>
+</html>
+

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Vue List - MNK Coders 2019&copy;</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+
+        <link href="https://fonts.googleapis.com/css?family=Play:400,700&display=swap" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet"/>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.css" rel="stylesheet"/>
+        <link href="css/style.css" rel="stylesheet"/>
+    </head>
+    <body>
+        <div class="container" id="list-manager">
+            <activity-manager></activity-manager>
+            <!--ul class="activity-container">
+              <li v-for="item in items" v-bind:data-id="item.id">{{ item.activity }}</li>
+            </ul-->
+        </div>
+
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+        <script type="text/javascript" src="https://vuejs.org/js/vue.js"></script>
+
+        <script type="text/javascript">
+            
+            Vue.component('activity-manager', {
+                data: function(){
+
+                    this.list = function(){
+                        
+                        var output = [];
+                        
+                        for( var i = 0 ; i < 20 ; i++ ){
+                            
+                            var title = 'test ' + i.toString();
+                            
+                            output.push({
+                                'id' : i,
+                                'duration': 0,
+                                'activity' : title
+                            });
+                        }
+                        
+                        return output;                        
+                    };
+                    
+                    return {
+                        items: this.list()
+                    };
+                },
+                template: '<ul class="activity-container">\
+                    <li v-for="item in items" v-bind:data-id="item.id">\
+                        <span class="container">{{item.activity}}</span>\
+                        <span class="duration">{{item.duration}}</span>\
+                        <button class="btn icon-edit">Edit</button>\
+                    </li></ul><!-- ACTIVITY CONTAINER -->'
+            });
+            
+            (new Vue({
+                'el': '#time-tracker',
+                'data': { }
+            }));
+
+        </script>
+    </body>
+</html>
+
