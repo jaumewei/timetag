@@ -3,66 +3,32 @@
  * @param {Boolean} autostart
  * @returns {Timer}
  */
-function Timer( autostart ) {
+function Timer( ) {
 
-    var _controller = {
-        'id': '',
-        'created': null,
-        'location': LocationProvider ? new LocationProvider() : null,
-        'init': null,
+    var _atts = {
+        'id': this.GenerateId(),
+        'created': new Date(),
+        'init': new Date(),
         'end': null,
-        'status': '',
-        
-        //activity attachked to project route
-        'path': []
     };
     /**
      * @return {String}
      */
-    this.id = function(){ return _controller.id; };
-    /**
-     * @param {Boolean} start 
-     * @return {Timer}
-     */
-    this.reset = function( start ){
-        
-        _controller.id = Timer.GenerateId();
-        _controller.created = new Date();
-        _controller.init = null;
-        _controller.end = null;
-        _controller.status = Timer.Status.CREATED;
-        
-        return start === true ? this.start() : this;
-    };
-    /**
-     * @param {String} ID
-     * @param {String} root
-     * @return {Timer}
-     */
-    this.register = function( ID , root ){
-        
-        _controller.id = ID;
-        
-        _controller.path = root.split('.');
-        
-        return this;
-    };
+    this.id = function(){ return _atts.id; };
     /**
      * @return {Object}
      */
     this.export = function(){
         
-        var init = _controller.init.getTime() !== null ? _controller.init.getTime() : 0;
+        var init = _atts.init.getTime() !== null ? _atts.init.getTime() : 0;
 
-        var end = _controller.end.getTime() !== null ? _controller.end.getTime() : 0;
+        var end = _atts.end.getTime() !== null ? _atts.end.getTime() : 0;
         
         return {
-            'id': _controller.id,
-            'created': _controller.created.getTime(),
+            'id': _atts.id,
+            'created': _atts.created.getTime(),
             'init': init,
             'end': end,
-            'status': _controller.status,
-            'location': this.location()
         };
     };
     /**
@@ -114,7 +80,7 @@ function Timer( autostart ) {
         output.push( seconds < 10 ? '0' + seconds.toString() : seconds );
         
         return ( status === true ) ?
-            Timer.Status.display( _controller.status ) + ' : ' + output.join(':') :
+            Timer.Status.display( _atts.status ) + ' : ' + output.join(':') :
             output.join(':');
     };
     /**
@@ -122,12 +88,12 @@ function Timer( autostart ) {
      */
     this.time = function(){
         
-        if( _controller.init !== 'undefined' ){
+        if( _atts.init !== 'undefined' ){
             
-            var start = _controller.init.getTime();
+            var start = _atts.init.getTime();
             
-            var end = ( _controller.end !== null ) ?
-                    _controller.end.getTime() :
+            var end = ( _atts.end !== null ) ?
+                    _atts.end.getTime() :
                     (new Date()).getTime();
             
             return parseInt( Math.abs( ( start - end ) / 1000 ) );
@@ -157,6 +123,10 @@ function Timer( autostart ) {
                 ( sec > 9 ) ? sec.toString() : '0' + sec.toString();
     };
     /**
+     * @returns {Number}
+     */
+    this.minutes = function(){ return parseInt( this.time() / 60 ) ; };
+    /**
      * @returns {String}
      */
     this.displayMinutes = function(){
@@ -170,6 +140,10 @@ function Timer( autostart ) {
                 ( min > 9 ) ? min.toString() : '0' + min.toString();
     };
     /**
+     * @returns {Number}
+     */
+    this.hours = function(){ return parseInt( this.time() / 3600 ) ; };
+    /**
      * @returns {String}
      */
     this.displayHours = function(){
@@ -179,27 +153,14 @@ function Timer( autostart ) {
         return ( hour > 9 ) ? hour.toString() : '0' + hour.toString();
     };
     /**
-     * @returns {Number}
-     */
-    this.minutes = function(){ return parseInt( this.time() / 60 ) ; };
-    /**
-     * @returns {Number}
-     */
-    this.hours = function(){ return parseInt( this.time() / 3600 ) ; };
-    /**
      * 
      * @returns {Timer}
      */
     this.start = function () {
 
-        _controller.init = new Date();
-        
-        _controller.end = null;
-        
-        _controller.status = Timer.Status.RUNNING;
-        
-        if( _controller.location !== null ){
-            _controller.location.request();
+        if( this.status() === this.Status.CREATED ){
+            _atts.init = new Date();
+            console.log( this.id() +  ' Paused' );
         }
 
         return this;
@@ -209,45 +170,40 @@ function Timer( autostart ) {
      * @returns {Timer}
      */
     this.stop = function () {
-        if (_controller.status === Timer.Status.RUNNING ) {
-            _controller.end = new Date();
-            _controller.status = Timer.Status.COMPLETED;
-        
-            if( _controller.location !== null ){
-                console.log( _controller.location.export());
-            }
+        if ( this.status() === Timer.Status.RUNNING ) {
+            _atts.end = new Date();
+            console.log( this.id() +  ' Stopped' );
         }
         return this;
     };
     /**
      * @returns {Number}
      */
-    this.status = function () { return _controller.status; };
+    this.status = function () {
+        switch( true ){
+            case ( this.completed() > 0 ): return this.Status.COMPLETED;
+            case ( this.started() > 0 ): return this.Status.RUNNING;
+            default: return this.Status.CREATED;
+        }
+    };
     /**
      * @return {Number}
      */
     this.started = function(){
-        return _controller.init !== null ? _controller.init.getTime() : 0;
+        return _atts.init !== null ? _atts.init.getTime() : 0;
     };
     /**
      * @return {Number}
      */
     this.completed = function(){
-        return _controller.end !== null ? _controller.end.getTime() : 0;
+        return _atts.end !== null ? _atts.end.getTime() : 0;
     };
     /**
      * @return {Date}
      */
-    this.created = function(){ return _controller.created; };
-    /**
-     * @return {Object|null}
-     */
-    this.location = function(){
-        
-        return _controller.location !== null ? _controller.location.export() : null;
-    };
+    this.created = function(){ return _atts.created; };
 
-    return this.reset( autostart );
+    return this;
 }
 /**
  * @return {Timer.Status}
@@ -255,13 +211,11 @@ function Timer( autostart ) {
 Timer.Status = {
     'CREATED': 0,
     'RUNNING': 1,
-    'PAUSED': 2,
-    'COMPLETED': 3,
+    'COMPLETED': 2,
     'display': function( status ){
         switch( status ){
             case this.CREATED: return 'created';
             case this.RUNNING: return 'running';
-            case this.PAUSED: return 'paused';
             case this.COMPLETED: return 'completed';
         }
     }
@@ -276,7 +230,7 @@ Timer.GenerateId = function(){
  * @param {Timer} timer
  * @return {Boolean}
  */
-Timer.Register = function( timer ){
+/*Timer.Register = function( timer ){
   
     if (typeof timer === 'object' && timer instanceof Timer) {
 
@@ -286,7 +240,7 @@ Timer.Register = function( timer ){
     }
   
     return false;
-};
+};*/
 /**
  * @type {Timer.Strings}
  */
